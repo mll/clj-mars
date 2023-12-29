@@ -8,11 +8,10 @@
 ;; 
 
 (ns clj-mars.core
-  (:require [corewars.load :as load-warrior]
-            [corewars.setup :as setup]
-            [corewars.execute :as execute]
-            [corewars.draw :as draw]
-;            [clojure2d.core :as c2d]
+  (:require [clj-mars.load :as load-warrior]
+            [clj-mars.setup :as setup]
+            [clj-mars.execute :as execute]
+            [clj-mars.draw :as draw]
             [clojure.pprint :refer [pprint]]
             [clojure.set :as s])
   (:gen-class))

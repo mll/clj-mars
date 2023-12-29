@@ -4,7 +4,7 @@
             [instaparse.failure :as insta-failure]
             [clojure.string :refer [join upper-case]]
             [clojure.walk :refer [postwalk prewalk]]
-            [corewars.setup :refer [map->Op]]))
+            [clj-mars.setup :refer [map->Op]]))
 
 (def parser (insta/parser (clojure.java.io/resource "icws88.bnf")))
 

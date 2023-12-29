@@ -1,5 +1,4 @@
 (ns clj-mars.draw
-  "Complete minimal example"
   (:require [clojure2d.core :as c2d]
             [fastmath.core :as m]))
 
