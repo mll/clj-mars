@@ -4,6 +4,7 @@
             [instaparse.failure :as insta-failure]
             [clojure.string :refer [join upper-case]]
             [clojure.walk :refer [postwalk prewalk]]
+            [clojure.set :refer [intersection union difference]]
             [clj-mars.setup :refer [map->Op]]))
 
 (def parser (insta/parser (clojure.java.io/resource "icws88.bnf")))
@@ -69,8 +70,12 @@
 
 ;; ============================== AST Processing =========================================
 
-(defmethod build-ast :programme [node _] 
+(defmethod build-ast :programme [node parameters] 
   (let [labels (extract-labels-map node)
+        _ (assert (empty? (intersection (set (keys labels)) (set (keys parameters)))) 
+                  (str "Labels in the programme cannot be named like game parameters: " (intersection (set (keys labels) (keys parameters)))))
+        full-params (merge parameters labels)
+
         instructions (filter #(= :terminated-instruction (first %)) (rest node))
         non-equ-instructions (vec (filter (comp not equ?) instructions))
         end-idxs (filter identity 
@@ -82,13 +87,11 @@
         end-idx (first end-idxs)
         end-value (if end-idx (or (end-value (nth non-equ-instructions 
                                                  end-idx)
-                                            {:labels labels
-                                             :offset end-idx}) (- end-idx)) 0)
+                                             (assoc full-params :CURLINE end-idx)) (- end-idx)) 0)
         
         final-instructions (if end-idx (take end-idx non-equ-instructions) 
                                non-equ-instructions)]
-    {:warrior (map map->Op (map-indexed #(build-ast %2 {:labels labels
-                                                        :offset %1}) 
+    {:warrior (map map->Op (map-indexed #(build-ast %2 (assoc full-params :CURLINE %1)) 
                                         final-instructions))
      :start-offset (if end-idx (+ end-idx end-value) 0)}))
 
@@ -152,8 +155,8 @@
 
 (defmethod build-ast :label-name [node extra] 
   (let [n (second node)
-        label (get-in extra [:labels n])
-        current-offset (get-in extra [:offset])
+        label (get-in extra [n])
+        current-offset (get-in extra [:CURLINE])
         equ? (sequential? label)]
     (when-not label (throw (IllegalStateException. (str "Label not found: " n))))
     (when-not current-offset (throw (IllegalStateException. "Logic error - no current offset")))
@@ -164,7 +167,7 @@
 (defn load-warrior 
   "Loads a warrior from a file. Produces a {:warrior ... :start-offset ...} map.
    The warrior is fully normalised, with all equ and end instructions removed." 
-  [path]
+  [path parameters]
   (let [parsed (->> path
                   (slurp)
                   (insta/parse parser)
@@ -179,5 +182,5 @@
                   (postwalk #(if (coll? %) (into (empty %) (remove nil? %)) %)))]    
     (when-not (vector? parsed) (throw (IllegalStateException. (with-out-str (insta-failure/pprint-failure parsed)))))
    ; (println parsed)
-    (build-ast parsed nil)
+    (build-ast parsed parameters)
     ))

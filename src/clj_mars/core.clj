@@ -1,12 +1,3 @@
-
-;; TODO:
-
-;; v 1. EQU 
-;; v 2. EQU i END - kontrola syntaxu (bo nie robimy tego w gramatyce. A moze powinnismy?) 
-;; v 3. pozostale opsy
-;; v 4. Biblioteka do UI (clojure2d)
-;; 
-
 (ns clj-mars.core
   (:require [clj-mars.load :as load-warrior]
             [clj-mars.setup :as setup]
@@ -21,14 +12,15 @@
   "For now just loading a warrior."
   [& args]
   (assert (= (count args) 2) "The names of two warrior .red files need to be passed as arguments")
-  (let [_ (println "Loading first warrior...")
-        wolf (load-warrior/load-warrior (first args))
+  (let [parameters (read-string (slurp (clojure.java.io/resource "config.edn")))        
+        _ (println "Loading first warrior...")
+        wolf (load-warrior/load-warrior (first args) parameters)
         _ (println "Loading second warrior...")
-        cock (load-warrior/load-warrior (second args))
+        cock (load-warrior/load-warrior (second args) parameters)
         _ (println "Starting game...")
         _ (println (map #(str % "\n") (map setup/map->Op (:warrior cock))))
-        game (atom (setup/start-game 8000 wolf cock))
-        iterations-before-draw 100000
+        game (atom (setup/start-game parameters wolf cock))
+        iterations-before-draw (:MAXCYCLES parameters)
         speed (atom 10)
         [canvas window] (draw/show game)
         result (future (loop [i 0]

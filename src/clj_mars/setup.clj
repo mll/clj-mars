@@ -24,6 +24,7 @@
 (spec/def ::warrior (spec/keys :req-un [:warrior/active-process :warrior/processes :warrior/fields-owned]))
 
 (spec/def :game/core ::op-sequence)
+(spec/def :game/parameters map?)
 (spec/def :game/core-size int?)
 (spec/def :game/wolf ::warrior)
 (spec/def :game/cock ::warrior)
@@ -70,23 +71,27 @@
         (recur (inc i) (assoc c (mod (+ i start-pos) s) (get warrior i)))
         c))))
 
-(defn start-game [core-size wolf cock]
-  (let [{wolf :warrior wolf-offset :start-offset} wolf
+(defn start-game [parameters wolf cock]
+  (let [core-size (:CORESIZE parameters)
+        {wolf :warrior wolf-offset :start-offset} wolf
         {cock :warrior cock-offset :start-offset} cock
         _ (assert (spec/valid? ::op-sequence wolf) (spec/explain ::op-sequence wolf))
         _ (assert (spec/valid? ::op-sequence cock) (spec/explain ::op-sequence cock))
         core (vec (repeat core-size (dat)))
         wolf-start (rand-int core-size)
         wolf-end (mod (+ wolf-start (count wolf)) core-size)
-        [cock-start cock-end] (loop [s (rand-int core-size)]
-                                (let [e (mod (+ s (count cock)) core-size)]
-                                  (if (overlaps? wolf-start wolf-end s e core-size)
+        min-distance (:MINDISTANCE parameters)
+        [cock-start cock-end] (loop [start (rand-int core-size)]
+                                (let [end (mod (+ start (count cock) (* 2 min-distance)) 
+                                               core-size)]
+                                  (if (overlaps? wolf-start wolf-end start end core-size)
                                     (recur (rand-int core-size))
-                                    [s e])))
+                                    [(mod (+ start min-distance) core-size) (+ start (count cock) min-distance)])))
         game {:core (-> core 
                (install-warrior wolf wolf-start)
                (install-warrior cock cock-start))
               :core-size core-size
+              :parameters parameters
               :wolf {:active-process 0 
                      :processes [(+ wolf-start wolf-offset)]
                      :fields-owned (set (map #(mod (+ wolf-start %) core-size) 

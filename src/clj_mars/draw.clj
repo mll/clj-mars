@@ -30,27 +30,27 @@
 
 ;;   ) ;; draw line
 
-(def pi Math/PI)
+;; (def pi Math/PI)
 
-(defn sierpinski [c left-bottom-x left-bottom-y side-length depth max-depth]
-  (if (> depth max-depth) nil
-  (let [angle (m/fast-identity (/ ^double pi 3))
-        dx (m/fast* (m/cos angle) side-length)
-        dy (m/fast* (m/sin angle) side-length)
-        top-x (m/fast+ left-bottom-x dx)
-        top-y (m/fast- left-bottom-y dy)
-        right-x (m/fast+ top-x dx) 
-        right-y (m/fast+ top-y dy)
-        half-side (/ side-length 2.0)]
-  (c2d/with-canvas-> c
-    (c2d/set-color 0 0 0)
-    (c2d/set-stroke 1.0 :round)
-    (c2d/line left-bottom-x left-bottom-y top-x top-y)
-    (c2d/line top-x top-y right-x right-y)
-    (c2d/line left-bottom-x left-bottom-y right-x right-y))
-  (sierpinski c left-bottom-x left-bottom-y half-side (inc depth) max-depth)
-  (sierpinski c (+ left-bottom-x half-side) left-bottom-y half-side (inc depth) max-depth)
-  (sierpinski c (+ left-bottom-x (/ half-side 2.0)) (- left-bottom-y (/ dy 2.0)) half-side (inc depth) max-depth))))
+;; (defn sierpinski [c left-bottom-x left-bottom-y side-length depth max-depth]
+;;   (if (> depth max-depth) nil
+;;   (let [angle (m/fast-identity (/ ^double pi 3))
+;;         dx (m/fast* (m/cos angle) side-length)
+;;         dy (m/fast* (m/sin angle) side-length)
+;;         top-x (m/fast+ left-bottom-x dx)
+;;         top-y (m/fast- left-bottom-y dy)
+;;         right-x (m/fast+ top-x dx) 
+;;         right-y (m/fast+ top-y dy)
+;;         half-side (/ side-length 2.0)]
+;;   (c2d/with-canvas-> c
+;;     (c2d/set-color 0 0 0)
+;;     (c2d/set-stroke 1.0 :round)
+;;     (c2d/line left-bottom-x left-bottom-y top-x top-y)
+;;     (c2d/line top-x top-y right-x right-y)
+;;     (c2d/line left-bottom-x left-bottom-y right-x right-y))
+;;   (sierpinski c left-bottom-x left-bottom-y half-side (inc depth) max-depth)
+;;   (sierpinski c (+ left-bottom-x half-side) left-bottom-y half-side (inc depth) max-depth)
+;;   (sierpinski c (+ left-bottom-x (/ half-side 2.0)) (- left-bottom-y (/ dy 2.0)) half-side (inc depth) max-depth))))
 
 ;(sierpinski my-canvas 150.0 945.0 1000.0 0 2)
 
