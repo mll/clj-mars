@@ -1,0 +1,58 @@
+programme = (terminated-instruction | empty-line)* 
+
+terminated-instruction = (instruction space? (comment|newline)) | 
+                         instruction
+
+instruction =  basic-instruction |
+               (space basic-instruction) |
+               (label space basic-instruction) |
+               (label space equ-instruction)   
+
+basic-instruction = end-instruction | primary-instruction | restricted-instruction
+
+equ-instruction = #"(?i)equ" space expression
+end-instruction = #"(?i)end" (space expression)?
+
+primary-instruction = opcode space address (comma address)?
+
+restricted-instruction = restricted-opcode space restricted-address (comma restricted-address)?
+restricted-opcode = #"(?i)dat"
+         
+address-op = pre-decrement-indirect|indirect|immediate
+address = address-op? expression 
+
+restricted-address = restricted-address-op expression
+restricted-address-op = pre-decrement-indirect|immediate
+
+p1-op = "*" | "/" | "%"
+p2-op = "+" | "-"
+
+space = #"\s+"
+
+expression = term | expression space? p2-op space? term
+term = factor | term space? p1-op space? factor
+factor = "(" space? expression space? ")" | integer | label-name | p2-op space? label-name
+
+label = space? label-name ":"? 
+empty-line = space? (comment|newline)
+comma = space? "," space?
+comment = #";.*\n" 
+newline = #"\r?\n" | (newline newline)
+
+immediate = "#"
+indirect = "@"
+pre-decrement-indirect = "<"
+
+integer = #"([+-]?[1-9]\d*|0)"
+label-name = #"(?i)[a-z]([a-z]|\d|_)+"
+
+opcode = #"(?i)mov"|
+         #"(?i)add"|
+         #"(?i)sub"|
+         #"(?i)jmp"|
+         #"(?i)jmz"|
+         #"(?i)jmn"|
+         #"(?i)cmp"|
+         #"(?i)slt"|
+         #"(?i)djn"|
+         #"(?i)spl"
