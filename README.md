@@ -13,7 +13,7 @@ Download from http://example.com/FIXME.
 
 ## License
 
-Copyright © 203-2024 Marek Lipert
+Copyright © 2023-2024 Marek Lipert
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
